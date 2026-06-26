@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
+from datetime import datetime
 
 from config import Config
 from models import db, Patient
-
 from ai import generate_health_recommendation
 
 app = Flask(__name__)
@@ -27,7 +27,7 @@ def home():
     )
 
 
-# ---------------- VIEW ALL PATIENTS ---------------- #
+# ---------------- VIEW PATIENTS ---------------- #
 
 @app.route("/patients")
 def patients():
@@ -47,31 +47,25 @@ def add_patient():
 
     if request.method == "POST":
 
-        height = float(request.form["height"])
-        weight = float(request.form["weight"])
+        full_name = request.form["full_name"].strip()
+        date_of_birth = request.form["date_of_birth"]
+        email = request.form["email"].strip()
 
-        bmi = weight / ((height / 100) ** 2)
+        glucose = float(request.form["glucose"])
+        haemoglobin = float(request.form["haemoglobin"])
+        cholesterol = float(request.form["cholesterol"])
 
-        blood_sugar = request.form["blood_sugar"]
-        blood_sugar = float(blood_sugar) if blood_sugar else None
+        # Validation
+        if datetime.strptime(date_of_birth, "%Y-%m-%d").date() > datetime.today().date():
+            return "Date of Birth cannot be in the future."
 
         patient = Patient(
-
-            name=request.form["name"],
-            age=int(request.form["age"]),
-            gender=request.form["gender"],
-
-            height=height,
-            weight=weight,
-
-            bmi=round(bmi, 2),
-
-            blood_pressure=request.form["blood_pressure"],
-            blood_sugar=blood_sugar,
-
-            smoking=request.form["smoking"],
-            exercise=request.form["exercise"]
-
+            full_name=full_name,
+            date_of_birth=date_of_birth,
+            email=email,
+            glucose=glucose,
+            haemoglobin=haemoglobin,
+            cholesterol=cholesterol
         )
 
         db.session.add(patient)
@@ -91,25 +85,13 @@ def edit_patient(id):
 
     if request.method == "POST":
 
-        patient.name = request.form["name"]
-        patient.age = int(request.form["age"])
-        patient.gender = request.form["gender"]
+        patient.full_name = request.form["full_name"]
+        patient.date_of_birth = request.form["date_of_birth"]
+        patient.email = request.form["email"]
 
-        patient.height = float(request.form["height"])
-        patient.weight = float(request.form["weight"])
-
-        patient.bmi = round(
-            patient.weight / ((patient.height / 100) ** 2),
-            2
-        )
-
-        patient.blood_pressure = request.form["blood_pressure"]
-
-        blood_sugar = request.form["blood_sugar"]
-        patient.blood_sugar = float(blood_sugar) if blood_sugar else None
-
-        patient.smoking = request.form["smoking"]
-        patient.exercise = request.form["exercise"]
+        patient.glucose = float(request.form["glucose"])
+        patient.haemoglobin = float(request.form["haemoglobin"])
+        patient.cholesterol = float(request.form["cholesterol"])
 
         db.session.commit()
 
@@ -121,7 +103,7 @@ def edit_patient(id):
     )
 
 
-# ---------------- DELETE PATIENT ---------------- #
+# ---------------- DELETE ---------------- #
 
 @app.route("/delete/<int:id>")
 def delete(id):
@@ -134,23 +116,28 @@ def delete(id):
 
     return redirect(url_for("patients"))
 
+
+# ---------------- AI PREDICTION ---------------- #
+
 @app.route("/predict/<int:id>")
 def predict(id):
 
     patient = Patient.query.get_or_404(id)
 
-    recommendation = generate_health_recommendation(patient)
+    remarks = generate_health_recommendation(patient)
 
-    patient.recommendation = recommendation
+    patient.remarks = remarks
 
     db.session.commit()
 
     return render_template(
         "prediction.html",
         patient=patient,
-        recommendation=recommendation
+        recommendation=remarks
     )
-# ---------------- RUN APP ---------------- #
+
+
+# ---------------- RUN ---------------- #
 
 if __name__ == "__main__":
     app.run(debug=True)

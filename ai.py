@@ -8,35 +8,45 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 model = genai.GenerativeModel("gemini-2.5-flash")
 
+
 def generate_health_recommendation(patient):
 
     prompt = f"""
-You are an experienced doctor.
+You are an experienced physician.
 
-Patient Information:
+Analyze the following patient's laboratory report.
 
-Name: {patient.name}
-Age: {patient.age}
-Gender: {patient.gender}
+Patient Details
 
-Height: {patient.height} cm
-Weight: {patient.weight} kg
-BMI: {patient.bmi}
+Full Name: {patient.full_name}
+Date of Birth: {patient.date_of_birth}
+Email: {patient.email}
 
-Blood Pressure: {patient.blood_pressure}
-Blood Sugar: {patient.blood_sugar}
+Medical Values
 
-Smoking: {patient.smoking}
-Exercise: {patient.exercise}
+Glucose: {patient.glucose} mg/dL
+Haemoglobin: {patient.haemoglobin} g/dL
+Cholesterol: {patient.cholesterol} mg/dL
 
-Based on this information:
+Please provide:
 
-1. Predict overall health risk (Low, Moderate, High).
-2. Explain why.
-3. Give 5 health recommendations.
-4. Suggest lifestyle improvements.
+1. Overall Health Risk (Low / Moderate / High)
 
-Keep the response short and easy to understand.
+2. Interpretation of Glucose
+
+3. Interpretation of Haemoglobin
+
+4. Interpretation of Cholesterol
+
+5. Possible health concerns
+
+6. Diet recommendations
+
+7. Lifestyle recommendations
+
+8. Whether the patient should consult a doctor urgently
+
+Keep the response professional, short and easy to understand.
 """
 
     response = model.generate_content(prompt)

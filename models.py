@@ -2,28 +2,22 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+
 class Patient(db.Model):
     __tablename__ = "patients"
 
     id = db.Column(db.Integer, primary_key=True)
 
-    name = db.Column(db.String(100), nullable=False)
-    age = db.Column(db.Integer, nullable=False)
-    gender = db.Column(db.String(20), nullable=False)
+    full_name = db.Column(db.String(100), nullable=False)
 
-    height = db.Column(db.Float, nullable=False)
-    weight = db.Column(db.Float, nullable=False)
+    date_of_birth = db.Column(db.String(20), nullable=False)
 
-    bmi = db.Column(db.Float)
+    email = db.Column(db.String(120), nullable=False)
 
-    blood_pressure = db.Column(db.String(30))
-    blood_sugar = db.Column(db.Float)
+    glucose = db.Column(db.Float, nullable=False)
 
-    smoking = db.Column(db.String(20))
-    exercise = db.Column(db.String(50))
+    haemoglobin = db.Column(db.Float, nullable=False)
 
-    prediction = db.Column(db.Text)
-    recommendation = db.Column(db.Text)
+    cholesterol = db.Column(db.Float, nullable=False)
 
-    def __repr__(self):
-        return f"<Patient {self.name}>"
+    remarks = db.Column(db.Text)
